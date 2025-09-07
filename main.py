@@ -196,8 +196,10 @@ def index():
     mprog = {
         "pct": 0.0 if total <= 0 else (elapsed / total) * 100.0,
         "days_left": max(0, int((nxt - now).total_seconds() // 86400)),
-        "start_str": cur.strftime('%Y-%m-%d'),
-        "end_str": nxt.strftime('%Y-%m-%d')
+        "start_str": cur.strftime('%-m/%-d/%Y'),
+        "end_str": nxt.strftime('%-m/%-d/%Y')
+
+
     }
     return render_template("index.html", rows=rows, recent=recent, mprog=mprog)
 
