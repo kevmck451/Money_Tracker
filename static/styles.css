@@ -29,3 +29,4 @@ button.ghost{background:transparent;border:1px solid #2a2f3a}
 .flash-ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4)}
 .flash-err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4)}
 @media (min-width:700px){ .grid{grid-template-columns:1fr 1fr} }
+.neg { color: var(--err); font-weight: 600; }

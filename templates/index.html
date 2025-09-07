@@ -14,22 +14,35 @@
       {% else %}
         {% set color = 'red' %}
       {% endif %}
-      <div class="budget" style="margin-bottom:12px;">
+      <div class="budget" style="margin-bottom:16px;">
         <div class="row-head">
           <strong>{{ r.cat.name }}</strong>
           <span>${{ '%.2f'|format(s.spent) }} / ${{ '%.2f'|format(s.effective) }}</span>
         </div>
-        <div class="muted small">
-          Base ${{ '%.2f'|format(s.base) }} + Carry {{ '+' if s.carry_in>=0 else '' }}${{ '%.2f'|format(s.carry_in) }}
-          = Effective ${{ '%.2f'|format(s.effective) }}
+
+        <!-- MOVED: show Remaining ABOVE the progress bar -->
+        <div class="muted small" style="margin:4px 0 6px;">
+          Remaining:
+          <strong class="{% if s.remaining < 0 %}neg{% endif %}">
+            ${{ '%.2f'|format(s.remaining) }}
+          </strong>
         </div>
+
+        <!-- Progress bar -->
         <div class="bar">
           <div class="bar-fill {{color}}" style="width: {{ '%.0f'|format(pct) }}%"></div>
           {% if s.over_by > 0 %}
             <div class="bar-over">+${{ '%.2f'|format(s.over_by) }}</div>
           {% endif %}
         </div>
+
+        <!-- MOVED: Base + Carry = Effective BELOW the bar -->
+        <div class="muted small" style="margin:6px 0 0;">
+          Base ${{ '%.2f'|format(s.base) }} + Carry {{ '+' if s.carry_in>=0 else '' }}${{ '%.2f'|format(s.carry_in) }}
+          = Effective ${{ '%.2f'|format(s.effective) }}
+        </div>
       </div>
+
     {% endfor %}
 
     <!-- Month progress widget -->
