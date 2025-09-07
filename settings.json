@@ -1,0 +1,10 @@
+{
+  "categories": {
+    "Kevin's Shopping": 100.0,
+    "Kendall's Shopping": 100.0,
+    "Home Items": 400.0,
+    "Groceries": 500.0,
+    "Eating Out": 250.0
+  },
+  "admin_pin": "1234"
+}

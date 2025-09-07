@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Money Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<header class="wrap" style="display:flex;justify-content:space-between;align-items:center;">
+  <h1>Money Tracker</h1>
+  <nav style="display:flex; gap:12px;">
+    <a href="{{ url_for('index') }}">Home</a>
+    {% if session.get('is_admin') %}
+      <a href="{{ url_for('admin') }}">Admin (unlocked)</a>
+      <a href="{{ url_for('logout') }}">Lock</a>
+    {% else %}
+      <a href="{{ url_for('admin') }}">Admin</a>
+    {% endif %}
+  </nav>
+</header>
+<main class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash">
+        {% for cat, msg in messages %}
+          <div class="flash-{{ 'ok' if cat=='ok' else 'err' }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="wrap">
+  <small>Reset day: 1st · All times UTC</small>
+</footer>
+</body>
+</html>

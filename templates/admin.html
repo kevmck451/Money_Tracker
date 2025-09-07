@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Admin</h2>
+
+  {% if not is_admin %}
+    <form class="stack" action="{{ url_for('admin') }}" method="post">
+      <input type="password" name="pin" placeholder="Admin PIN" required>
+      <button type="submit">Unlock</button>
+    </form>
+    <p class="muted small" style="margin-top:8px;">Enter the admin PIN to edit this month's budgets.</p>
+  {% else %}
+    <form class="stack" action="{{ url_for('admin') }}" method="post">
+      <h3>This Month's Budgets</h3>
+      {% for c, mb in items %}
+        <label style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+          <span>{{ c.name }}</span>
+          <input class="num" type="number" step="0.01" name="base_{{ c.id }}" value="{{ '%.2f'|format(mb.base_budget) }}">
+        </label>
+      {% endfor %}
+      <div style="display:flex; gap:8px;">
+        <button type="submit">Save</button>
+        <a class="ghost" href="{{ url_for('logout') }}">Lock Admin</a>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

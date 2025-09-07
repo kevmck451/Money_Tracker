@@ -1,0 +1,16 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS cruft
+.DS_Store
+
+# Local data files
+*.db
+*.sqlite3
+
+# Logs
+*.log
+EOF
