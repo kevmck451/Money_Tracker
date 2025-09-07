@@ -4,7 +4,7 @@ import json
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func, UniqueConstraint
+from sqlalchemy import func, UniqueConstraint, text
 
 app = Flask(__name__)
 app.secret_key = "change-this"
@@ -19,6 +19,9 @@ db = SQLAlchemy(app)
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)   # show/hide in main UI
+    display_order = db.Column(db.Integer, nullable=False, default=9999)  # custom sort
+
 
 class MonthlyBudget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -117,15 +120,16 @@ def current_month_summary(cat: Category, now_utc: datetime):
         "over_by": over_by
     }
 
-def ytd_totals(now_utc: datetime):
+def ytd_totals(now_utc: datetime, active_only: bool = False):
     """
     Returns (rows, overall) where:
       - rows = list of {"cat": Category, "spent": float} for Jan 1 -> now
       - overall = float sum across categories
-    Uses existing month_spend_for_category() helper for correctness.
+    Set active_only=True to include only currently active categories.
     """
     start_of_year = datetime(now_utc.year, 1, 1, tzinfo=timezone.utc)
-    cats = sort_categories(Category.query.all()) if 'sort_categories' in globals() else Category.query.order_by(Category.name).all()
+    q = Category.query.filter_by(is_active=True) if active_only else Category.query
+    cats = sort_categories(q.all())
     rows = []
     overall = 0.0
     for c in cats:
@@ -133,6 +137,7 @@ def ytd_totals(now_utc: datetime):
         rows.append({"cat": c, "spent": spent})
         overall += spent
     return rows, overall
+
 
 
 
@@ -152,6 +157,19 @@ def sort_categories(cats):
 # -------------------- Init --------------------
 with app.app_context():
     db.create_all()
+    # --- lightweight SQLite migration: add columns if missing ---
+    def _table_has_column(table, col):
+        rows = db.session.execute(text(f"PRAGMA table_info({table})")).fetchall()
+        return any(r[1] == col for r in rows)
+
+    if not _table_has_column("Category", "is_active"):
+        db.session.execute(text("ALTER TABLE Category ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT 1"))
+        db.session.commit()
+
+    if not _table_has_column("Category", "display_order"):
+        db.session.execute(text("ALTER TABLE Category ADD COLUMN display_order INTEGER NOT NULL DEFAULT 9999"))
+        db.session.commit()
+
     cfg = load_cfg()
     existing = {c.name for c in Category.query.all()}
     for name in cfg["categories"].keys():
@@ -168,7 +186,7 @@ with app.app_context():
 @app.route("/")
 def index():
     now = datetime.now(timezone.utc)
-    cats = sort_categories(Category.query.all())
+    cats = sort_categories(Category.query.filter_by(is_active=True).all())
     rows = [{"cat": c, "sum": current_month_summary(c, now)} for c in cats]
     recent = Purchase.query.order_by(Purchase.ts.desc()).limit(20).all()
     # month progress widget fields (already in your templates)
@@ -214,7 +232,7 @@ def edit(pid):
         db.session.commit()
         flash("Purchase updated.", "ok")
         return redirect(url_for("index"))
-    cats = sort_categories(Category.query.all())
+    cats = sort_categories(Category.query.filter_by(is_active=True).all())
     return render_template("edit.html", purchase=p, categories=cats)
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -263,9 +281,9 @@ def logout():
 @app.route("/totals")
 def totals():
     now = datetime.now(timezone.utc)
-    rows, overall = ytd_totals(now)
+    active_only = request.args.get("active_only", "0") == "1"
+    rows, overall = ytd_totals(now, active_only=active_only)
 
-    # Prepare data for the chart: labels + values
     labels = [r["cat"].name for r in rows]
     values = [round(r["spent"], 2) for r in rows]
 
@@ -275,8 +293,10 @@ def totals():
         values=values,
         rows=rows,
         overall=overall,
-        year=now.year
+        year=now.year,
+        active_only=active_only,   # <-- pass to template
     )
+
 
 
 

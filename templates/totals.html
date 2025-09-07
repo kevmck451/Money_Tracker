@@ -2,6 +2,16 @@
 {% block content %}
 <div class="card">
   <h2>Totals — {{ year }}</h2>
+  <div class="muted small" style="margin:6px 0 10px 0;">
+    View:
+    {% if active_only %}
+      <strong>Current categories</strong> ·
+      <a href="{{ url_for('totals', active_only=0) }}">Full history</a>
+    {% else %}
+      <strong>Full history</strong> ·
+      <a href="{{ url_for('totals', active_only=1) }}">Current categories</a>
+    {% endif %}
+  </div>
 
   <!-- Overall total -->
   <p style="margin:6px 0 12px 0;">
