@@ -119,12 +119,13 @@ def current_month_summary(cat: Category, now_utc: datetime):
 
 # Preferred display order: put Home Items under the two “Shopping” cats
 PREFERRED_ORDER = [
-    "Kevin's Shopping",
-    "Kendall's Shopping",
     "Home Items",
-    "Groceries",
+    "Kendall's Shopping",
+    "Kevin's Shopping",
     "Eating Out",
+    "Groceries",
 ]
+
 def sort_categories(cats):
     order_index = {name: i for i, name in enumerate(PREFERRED_ORDER)}
     return sorted(cats, key=lambda c: (order_index.get(c.name, 9999), c.name.lower()))
