@@ -19,15 +19,15 @@
           <strong>{{ r.cat.name }}</strong>
           <span>${{ '%.2f'|format(s.spent) }} / ${{ '%.2f'|format(s.effective) }}</span>
         </div>
+        <div class="muted small">
+          Base ${{ '%.2f'|format(s.base) }} + Carry {{ '+' if s.carry_in>=0 else '' }}${{ '%.2f'|format(s.carry_in) }}
+          = Effective ${{ '%.2f'|format(s.effective) }}
+        </div>
         <div class="bar">
           <div class="bar-fill {{color}}" style="width: {{ '%.0f'|format(pct) }}%"></div>
           {% if s.over_by > 0 %}
             <div class="bar-over">+${{ '%.2f'|format(s.over_by) }}</div>
           {% endif %}
-        </div>
-        <div class="muted small">
-          Base ${{ '%.2f'|format(s.base) }} + Carry {{ '+' if s.carry_in>=0 else '' }}${{ '%.2f'|format(s.carry_in) }}
-          = Effective ${{ '%.2f'|format(s.effective) }}
         </div>
       </div>
     {% endfor %}
