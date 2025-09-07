@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Totals — {{ year }}</h2>
+
+  <!-- Overall total -->
+  <p style="margin:6px 0 12px 0;">
+    <strong>Overall spent (YTD):</strong> ${{ '%.2f'|format(overall) }}
+  </p>
+
+  <!-- Bar chart -->
+  <div style="background:#0f1117;border:1px solid #2a2f3a;border-radius:12px;padding:10px;">
+    <canvas id="ytdChart"></canvas>
+  </div>
+
+  <!-- Table for quick reference -->
+  <h3 style="margin-top:14px;">By Category</h3>
+  <ul class="list">
+    {% for r in rows %}
+      <li style="justify-content:space-between;">
+        <span>{{ r.cat.name }}</span>
+        <strong>${{ '%.2f'|format(r.spent) }}</strong>
+      </li>
+    {% else %}
+      <li class="muted">No data yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Chart.js CDN (lightweight, client-side only) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const labels = {{ labels|tojson }};
+  const values = {{ values|tojson }};
+
+  const ctx = document.getElementById('ytdChart').getContext('2d');
+  // Single-series vertical bar chart
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'YTD Spend ($)',
+        data: values,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'index', intersect: false }
+      }
+    }
+  });
+  // Make container taller for mobile readability
+  document.getElementById('ytdChart').parentElement.style.height = '280px';
+</script>
+{% endblock %}

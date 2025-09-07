@@ -117,6 +117,25 @@ def current_month_summary(cat: Category, now_utc: datetime):
         "over_by": over_by
     }
 
+def ytd_totals(now_utc: datetime):
+    """
+    Returns (rows, overall) where:
+      - rows = list of {"cat": Category, "spent": float} for Jan 1 -> now
+      - overall = float sum across categories
+    Uses existing month_spend_for_category() helper for correctness.
+    """
+    start_of_year = datetime(now_utc.year, 1, 1, tzinfo=timezone.utc)
+    cats = sort_categories(Category.query.all()) if 'sort_categories' in globals() else Category.query.order_by(Category.name).all()
+    rows = []
+    overall = 0.0
+    for c in cats:
+        spent = month_spend_for_category(c.id, start_of_year, now_utc)
+        rows.append({"cat": c, "spent": spent})
+        overall += spent
+    return rows, overall
+
+
+
 # Preferred display order: put Home Items under the two “Shopping” cats
 PREFERRED_ORDER = [
     "Home Items",
@@ -240,6 +259,26 @@ def logout():
     session.pop("is_admin", None)
     flash("Admin locked.", "ok")
     return redirect(url_for("index"))
+
+@app.route("/totals")
+def totals():
+    now = datetime.now(timezone.utc)
+    rows, overall = ytd_totals(now)
+
+    # Prepare data for the chart: labels + values
+    labels = [r["cat"].name for r in rows]
+    values = [round(r["spent"], 2) for r in rows]
+
+    return render_template(
+        "totals.html",
+        labels=labels,
+        values=values,
+        rows=rows,
+        overall=overall,
+        year=now.year
+    )
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8001, debug=True)

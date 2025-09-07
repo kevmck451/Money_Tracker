@@ -11,6 +11,7 @@
   <h1>Money Tracker</h1>
   <nav style="display:flex; gap:12px;">
     <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('totals') }}">Totals</a>
     {% if session.get('is_admin') %}
       <a href="{{ url_for('admin') }}">Admin (unlocked)</a>
       <a href="{{ url_for('logout') }}">Lock</a>
