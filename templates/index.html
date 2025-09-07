@@ -14,7 +14,7 @@
       {% else %}
         {% set color = 'red' %}
       {% endif %}
-      <div class="budget">
+      <div class="budget" style="margin-bottom:12px;">
         <div class="row-head">
           <strong>{{ r.cat.name }}</strong>
           <span>${{ '%.2f'|format(s.spent) }} / ${{ '%.2f'|format(s.effective) }}</span>
@@ -33,7 +33,7 @@
     {% endfor %}
 
     <!-- Month progress widget -->
-    <div class="monthbox" style="margin-top:12px;">
+    <div class="monthbox" style="margin-top:32px;">
       <div class="row-head">
         <strong>Month progress</strong>
         <span>{{ '%.0f'|format(mprog.pct) }}% · {{ mprog.days_left }} day{% if mprog.days_left != 1 %}s{% endif %} left</span>
