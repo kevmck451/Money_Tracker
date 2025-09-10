@@ -148,6 +148,7 @@ PREFERRED_ORDER = [
     "Kevin's Shopping",
     "Eating Out",
     "Groceries",
+    "Cars"
 ]
 
 def sort_categories(cats):
