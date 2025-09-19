@@ -72,9 +72,9 @@
       <button type="submit">Save</button>
     </form>
 
-    <h3 style="margin-top:1rem;">Recent</h3>
+    <h3 style="margin-top:1rem;">This Month</h3>
     <ul class="list">
-      {% for p in recent %}
+      {% for p in purchases %}
         <li>
           <div>
             <strong>{{ p.category.name }}</strong> — ${{ '%.2f'|format(p.amount) }}
@@ -88,9 +88,10 @@
           </div>
         </li>
       {% else %}
-        <li class="muted">No items yet.</li>
+        <li class="muted">No items for this month.</li>
       {% endfor %}
     </ul>
+
   </div>
 </section>
 {% endblock %}

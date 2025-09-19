@@ -187,22 +187,35 @@ with app.app_context():
 @app.route("/")
 def index():
     now = datetime.now(timezone.utc)
+
+    # budgets summary rows (active categories only)
     cats = sort_categories(Category.query.filter_by(is_active=True).all())
     rows = [{"cat": c, "sum": current_month_summary(c, now)} for c in cats]
-    recent = Purchase.query.order_by(Purchase.ts.desc()).limit(20).all()
-    # month progress widget fields (already in your templates)
-    cur = month_start(now); nxt = next_month_start(cur)
+
+    # month range
+    cur = month_start(now)
+    nxt = next_month_start(cur)
+
+    # ALL purchases in the current month (newest first)
+    purchases = (
+        Purchase.query
+        .filter(Purchase.ts >= cur, Purchase.ts < nxt)
+        .order_by(Purchase.ts.desc())
+        .all()
+    )
+
+    # month progress widget fields
     total = (nxt - cur).total_seconds()
     elapsed = max(0.0, min(total, (now - cur).total_seconds()))
     mprog = {
         "pct": 0.0 if total <= 0 else (elapsed / total) * 100.0,
         "days_left": max(0, int((nxt - now).total_seconds() // 86400)),
         "start_str": cur.strftime('%-m/%-d/%Y'),
-        "end_str": nxt.strftime('%-m/%-d/%Y')
-
-
+        "end_str": nxt.strftime('%-m/%-d/%Y'),
     }
-    return render_template("index.html", rows=rows, recent=recent, mprog=mprog)
+
+    return render_template("index.html", rows=rows, purchases=purchases, mprog=mprog)
+
 
 @app.route("/add", methods=["POST"])
 def add():
